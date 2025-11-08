@@ -129,7 +129,7 @@ h1 {
 }
 
 .panel {
-    background: linear-gradient(180deg, var(--panel), var(--panel-2));
+    background: var(--bg);
     border: 1px solid rgba(255, 255, 255, .06);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
@@ -158,7 +158,7 @@ h1 {
 
 writeup {
     margin-top: 5rem;
-    color: var(----text);
+    color: var(--text);
     text-align: center;
 }
 
