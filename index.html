@@ -65,12 +65,12 @@
           visual clutter issues that one bar graph would have, whilst making it
           easier to compare seasonal precipitation patterns within each model.
           Additionally, we chose to use blue and orange to render SSP2.45 and
-          SSP1.26 respectively to create a clear visual contract while also
+          SSP1.26 respectively to create a clear visual contrast while also
           reflecting their underlying meaning. The blue in the zero-mitigation
           scenario symbolizes the current state of conditions, while the orange
           in the aggressive-mitigation scenario conveys urgency and intensity.
           This color pairing also accommodates colorblind viewers, ensuring
-          clear distinction between the two models.Additional context for each
+          clear distinction between the two models. Additional context for each
           of the models are provided to the user in the subtitle, outlining
           whether it is for zero mitigation or aggressive mitigation
           respectively.
@@ -83,6 +83,34 @@
           variation. The bar charts also allowed us to represent numeric detail
           (e.g., exact mm/day) more precisely and in a more accessible format.
         </p>
+        <div>
+          <h4><strong>Overview of Interaction Design</strong></h4>
+          <p>
+            We implemented interactive features to enhance both exploration and
+            analysis. Each feature allows users to examine the data at multiple
+            levels, from overall patterns to precise values.
+          </p>
+          <p>
+            <strong>Tooltip and Hover: </strong>Provides precise quantitative
+            information without cluttering the visualization. When users hover
+            over a bar, the tooltip shows the exact average monthly
+            precipitation value for that month, year, and model, rather than
+            estimating from the plot's gridlines.
+          </p>
+          <p>
+            <strong>Slider Bar: </strong> Allows users to adjust the displayed
+            year on both plots simultaneously, enabling users to directly
+            observe changes in monthly precipitation patterns over time and
+            compare trends across the two climate scenarios.
+          </p>
+          <p>
+            By combining overview and detail-on-demand, the tooltip and slider
+            bar help users engage with the data more deeply, facilitating
+            insight into patterns, variability, and differences between the
+            climate scenarios. Both features also help streamline the
+            visualization, making them easier for users to interpret.
+          </p>
+        </div>
         <div>
           <h4><strong>Overview of the Development Process</strong></h4>
           <p>The work was split as such:</p>
