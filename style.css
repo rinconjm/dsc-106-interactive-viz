@@ -222,3 +222,36 @@ footer a:hover {
   font-size: 12px;
   opacity: 0.9;
 }
+
+/* stats styling */
+#statsLeft .stats-wrap,
+#statsRight .stats-wrap {
+  display: grid;
+  gap: 0.5rem;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.stats-title {
+  margin-bottom: 0.25rem;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 0.35rem 1rem;
+}
+
+.stats-grid .k {
+  display: inline-block;
+  opacity: 0.8;
+  margin-right: 0.4rem;
+}
+
+.stats-grid .v {
+  font-weight: 600;
+}

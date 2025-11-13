@@ -1,4 +1,3 @@
-// global.js — drop-in replacement
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm';
 
 async function loadData() {
@@ -23,6 +22,8 @@ const months = [
     'dec'
 ];
 
+const monthLabel = m => m.charAt(0).toUpperCase() + m.slice(1);
+
 // flatten rows {model, year, month, value}
 const rows = allData.flatMap(d =>
   months.map(m => ({
@@ -43,6 +44,8 @@ const left  = d3.select('#chartLeft');
 const right = d3.select('#chartRight');
 const slider = d3.select('#slider');
 const sliderValue = d3.select('#sliderValue');
+const statsLeft  = d3.select('#statsLeft');
+const statsRight = d3.select('#statsRight');
 
 // get years
 const years = Array.from(new Set(rows.map(r => r.year))).sort((a, b) => a - b);
@@ -55,11 +58,18 @@ const headerRight = d3.select('#headerRight');
 const colorA = 'oklch(0.6029 0.1283 235.05)'; // blue
 const colorB = 'oklch(0.7559 0.1579 69.88)';  // orange
 
+// years by model
+const yearsByModel = d3.rollup(
+  rows,
+  v => Array.from(new Set(v.map(d => d.year))).sort((a,b) => a-b),
+  d => d.model
+);
+
 // slider across year range
 slider
   .attr('min', 0)
   .attr('max', years.length - 1)
-  .attr('step', 1)
+  .attr('step', 10)
   .attr('value', 0); // this is the start year
 
 function currentYear() {
@@ -67,9 +77,89 @@ function currentYear() {
   return years[Math.max(0, Math.min(idx, years.length - 1))];
 }
 
-//tooltip feature
+// tooltip feature
 const tooltip = d3.select('body')
   .append('div').attr('id', 'tooltip');
+
+// stats
+function mean(arr) {
+  return arr.length ? d3.mean(arr) : NaN;
+}
+
+function computeYearStats(model, year) {
+  // Current-year monthly data
+  const curr = rows.filter(r => r.model === model && r.year === year);
+
+  // If no data, return safe blanks
+  if (curr.length === 0) {
+    return {
+      year,
+      avg: NaN,
+      min: { month: '—', value: NaN },
+      max: { month: '—', value: NaN },
+      prevYear: null,
+      nextYear: null,
+      prevAvg: NaN,
+      nextAvg: NaN
+    };
+  }
+
+  const values = curr.map(d => d.value);
+  const avg = mean(values);
+
+  // Find min/max months
+  const minRow = curr.reduce((a,b) => (a.value <= b.value ? a : b));
+  const maxRow = curr.reduce((a,b) => (a.value >= b.value ? a : b));
+
+  // Find previous/next year that exists for THIS model
+  const list = yearsByModel.get(model) || years;
+  const idx = list.indexOf(year);
+
+  const prevYear = idx > 0 ? list[idx - 1] : null;
+  const nextYear = idx >= 0 && idx < list.length - 1 ? list[idx + 1] : null;
+
+  const prevValues = prevYear
+    ? rows.filter(r => r.model === model && r.year === prevYear).map(d => d.value)
+    : [];
+  const nextValues = nextYear
+    ? rows.filter(r => r.model === model && r.year === nextYear).map(d => d.value)
+    : [];
+
+  return {
+    year,
+    avg,
+    min: { month: monthLabel(minRow.month), value: minRow.value },
+    max: { month: monthLabel(maxRow.month), value: maxRow.value },
+    prevYear,
+    nextYear,
+    prevAvg: mean(prevValues),
+    nextAvg: mean(nextValues)
+  };
+}
+
+function fmt(v) {
+  return Number.isFinite(v) ? v.toFixed(2) : '—';
+}
+
+function renderStats(container, stats, modelLabel) {
+  // Build a small card-like layout; uses your panel-body styles
+  const {
+    year, avg, min, max, prevYear, nextYear, prevAvg, nextAvg
+  } = stats;
+
+  container.html(`
+    <div class="stats-wrap">
+      <div class="stats-title"><strong>${modelLabel} — ${year}</strong></div>
+      <div class="stats-grid">
+        <div><span class="k">Year Avg</span><span class="v">${fmt(avg)} mm/day</span></div>
+        <div><span class="k">Lowest</span><span class="v">${min.month}: ${fmt(min.value)}</span></div>
+        <div><span class="k">Highest</span><span class="v">${max.month}: ${fmt(max.value)}</span></div>
+        <div><span class="k">Prev Year</span><span class="v">${prevYear ?? '—'} ${prevYear ? `(${fmt(prevAvg)})` : ''}</span></div>
+        <div><span class="k">Next Year</span><span class="v">${nextYear ?? '—'} ${nextYear ? `(${fmt(nextAvg)})` : ''}</span></div>
+      </div>
+    </div>
+  `);
+}
 
 // draw chart at current year
 function draw() {
@@ -85,6 +175,9 @@ function draw() {
   // update year headers
   if (!headerLeft.empty())  headerLeft.text(`Model SSP2.45 — ${year}`);
   if (!headerRight.empty()) headerRight.text(`Model SSP1.26 — ${year}`);
+
+  renderStats(statsLeft,  computeYearStats(MODEL_A, year), 'SSP2.45');
+  renderStats(statsRight, computeYearStats(MODEL_B, year), 'SSP1.26');
 
   drawBarChart(left,  dataA, colorA, year);
   drawBarChart(right, dataB, colorB, year);
