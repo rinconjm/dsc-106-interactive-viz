@@ -207,13 +207,11 @@ slider.on('input', e => {
 function drawBarChart(container, data, color, year) {
   container.selectAll('*').remove();
 
-  // Clear existing legend
-  container.select(function() {
-    return this.parentNode.querySelector(".chart-legend");
-  }).innerHTML = "";
-
   // Build new legend
   const legendContainer = d3.select(container.node().parentNode).select(".chart-legend");
+
+  // Clear existing legend
+  legendContainer.html("");
 
   legendContainer.append("div")
     .attr("class", "chart-legend-item")
