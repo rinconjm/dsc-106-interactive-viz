@@ -160,7 +160,6 @@ function renderStats(container, stats, modelLabel) {
 
   container.html(`
     <div class="stats-wrap">
-      <div class="stats-title"><strong>${modelLabel} — ${year}</strong></div>
       <div class="stats-grid">
         <div><span class="k">Year Avg</span><span class="v">${fmt(avg)} mm/day</span></div>
         <div><span class="k">Lowest</span><span class="v">${min.month}: ${fmt(min.value)}</span></div>

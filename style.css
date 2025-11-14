@@ -231,6 +231,7 @@ footer a:hover {
   font-family: inherit;
   font-size: inherit;
   line-height: inherit;
+  justify-content: space-around;
 }
 
 .stats-title {
