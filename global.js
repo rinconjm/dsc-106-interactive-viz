@@ -335,6 +335,84 @@ function drawBarChart(container, data, color, year) {
   // send the band group behind everything else
   bands.lower();
 
+
+  // ===== centered annotation (hard-coded) =====
+const SHOW_YEARS = new Set([2025, 2030, 2100]);
+if (SHOW_YEARS.has(year)) {
+  // figure out which side/model this chart is
+  const isLeft  = container.attr('id') === 'chartLeft';
+  const model   = isLeft ? 'ssp2-45' : 'ssp1-26';
+
+  // hard-coded text per (model, year)
+  const NOTE = {
+    'ssp2-45': {
+      2025: 'Early years show tame winter precipitation with 3-4 mm/day, accompanied by long dry summers',
+      2030: 'Signs of intensified peaks as high as 9mm per day in February, indicating wet extremes under high emissions ', 
+      2100: 'By 2100, high emissions yield slightly wetter winters with persistent dry summer '
+    },
+    'ssp1-26': {
+      2025: 'With mitigation, patterns look nearly identical, climate differences between models not yet apparent',
+      2030: 'Much smoother, more evenly distributed rainfall with no signs of apparent spikes',
+      2100: 'Meanwhile, stronger winter peaks of precipitation are shown, while summers stay dry.'
+    }
+  };
+
+  const text = NOTE[model][year];
+
+  // box size/position
+  const boxW = Math.max(260, innerW * 0.50);
+  const boxH = 64;
+  const boxX = (innerW - boxW) / 2;
+  const boxY = innerH * 0.26;
+
+  const ann = g.append('g')
+    .attr('class', 'annotation')
+    .attr('transform', `translate(${boxX},${boxY})`);
+
+  ann.append('rect')
+    .attr('width', boxW)
+    .attr('height', boxH)
+    .attr('rx', 10).attr('ry', 10)
+    .attr('fill', 'rgba(255,255,255,0.85)')
+    .attr('stroke', 'rgba(0,0,0,0.10)')
+    .attr('filter', 'drop-shadow(0 8px 18px rgba(0,0,0,0.10))')
+    .attr('pointer-events', 'none');
+
+  // tiny word-wrap helper
+  function wrap(sel, width, lh = 16) {
+    sel.each(function () {
+      const t = d3.select(this);
+      const words = (t.text() || '').split(/\s+/).reverse();
+      let line = [], lineNumber = 0;
+      const x = +t.attr('x') || 0, y = +t.attr('y') || 0;
+      let tsp = t.text(null).append('tspan').attr('x', x).attr('y', y);
+      let w;
+      while ((w = words.pop())) {
+        line.push(w);
+        tsp.text(line.join(' '));
+        if (tsp.node().getComputedTextLength() > width) {
+          line.pop();
+          tsp.text(line.join(' '));
+          line = [w];
+          tsp = t.append('tspan')
+            .attr('x', x)
+            .attr('y', y)
+            .attr('dy', `${++lineNumber * lh}px`)
+            .text(w);
+        }
+      }
+    });
+  }
+
+  ann.append('text')
+    .attr('x', 12)
+    .attr('y', 20)
+    .attr('class', 'annotation-text')
+    .text(text)
+    .call(wrap, boxW - 24)
+    .attr('pointer-events', 'none');
+}
+
   // x label
   svg.append('text')
     .attr('class', 'x label')

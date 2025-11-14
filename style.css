@@ -277,3 +277,21 @@ footer a:hover {
   height: 14px;
   border-radius: 3px;
 }
+
+
+/* annotations styling */
+/* .annotation { pointer-events: none; }          don’t block bar hover */
+/* .annotation rect { */
+  /* fill: rgba(255,255,255,0.55);                translucent; bands still show */
+  /* stroke: rgba(0,0,0,0.12); */
+  /* rx: 10; */
+  /* filter: drop-shadow(0 4px 10px rgba(0,0,0,0.12)); */
+/* } */
+/* .annotation text { */
+  /* font-size: 13px; */
+  /* fill: #1d1f37; */
+/* } */
+
+.annotation text,
+.annotation .annotation-text { font-size: 13px; fill: #1d1f37; }
+.annotation rect, .annotation text { pointer-events: none; }
