@@ -22,6 +22,13 @@ const months = [
     'dec'
 ];
 
+    // Set your seasons per month
+const SEASON = {
+  jan: "wet", feb: "wet", mar: "wet", apr: "dry", may: "dry",
+  jun: "dry", jul: "dry", aug: "dry", sep: "dry",
+  oct: "dry", nov: "wet", dec: "wet"
+};
+
 const monthLabel = m => m.charAt(0).toUpperCase() + m.slice(1);
 
 // flatten rows {model, year, month, value}
@@ -55,8 +62,12 @@ const headerLeft  = d3.select('#headerLeft');
 const headerRight = d3.select('#headerRight');
 
 // select colors
-const colorA = 'oklch(0.6029 0.1283 235.05)'; // blue
-const colorB = 'oklch(0.7559 0.1579 69.88)';  // orange
+const colorA = 'oklch(0.5087 0.1119 259.41)'; // Darker blue
+const colorB = 'oklch(0.5087 0.1119 259.41)';  // Lighter Blue 
+
+// oklch(0.6029 0.1283 235.05) Blue 
+// oklch(0.7559 0.1579 69.88) Orange
+
 
 // years by model
 const yearsByModel = d3.rollup(
@@ -196,6 +207,28 @@ slider.on('input', e => {
 function drawBarChart(container, data, color, year) {
   container.selectAll('*').remove();
 
+  // Clear existing legend
+  container.select(function() {
+    return this.parentNode.querySelector(".chart-legend");
+  }).innerHTML = "";
+
+  // Build new legend
+  const legendContainer = d3.select(container.node().parentNode).select(".chart-legend");
+
+  legendContainer.append("div")
+    .attr("class", "chart-legend-item")
+    .html(`
+      <div class="chart-legend-swatch" style="background: rgba(59, 130, 246, 0.20)"></div>
+      Wet months
+    `);
+
+  legendContainer.append("div")
+    .attr("class", "chart-legend-item")
+    .html(`
+      <div class="chart-legend-swatch" style="background: rgba(245, 158, 11, 0.25)"></div>
+      Dry months
+    `);
+
   const node = container.node();
   const width = node.clientWidth;
   const height = node.clientHeight;
@@ -273,13 +306,37 @@ function drawBarChart(container, data, color, year) {
     })
     .on('mousemove', function(event) {
       tooltip
-        .style('left', event.pageX + 6 + 'px')
-        .style('top', (event.pageY -90) + 'px');
+        .style('left', event.clientX + 6 + 'px')
+        .style('top', (event.clientY -90) + 'px');
     })
     .on('mouseleave', function() {
       d3.select(this).attr('opacity', 1);
       tooltip.style('opacity', 0);
     });
+
+    // 🔹 Background month bands (wet/dry)
+  const categories = x.domain(); // ['jan','feb',...,'dec']
+
+  const bands = g.append("g")
+    .attr("class", "month-bands");
+
+  bands.selectAll("rect.band")
+    .data(categories)
+    .join("rect")
+      .attr("class", "band")
+      .attr("x", m => x(m))
+      .attr("y", 0)
+      .attr("width", x.bandwidth())
+      .attr("height", innerH)
+      .attr("fill", m =>
+        SEASON[m] === "dry"
+          ? "rgba(245, 158, 11, 0.12)"   // dry
+          : "rgba(59, 130, 246, 0.10)"   // wet
+      )
+      .attr("pointer-events", "none");
+
+  // send the band group behind everything else
+  bands.lower();
 
   // x label
   svg.append('text')
@@ -301,6 +358,7 @@ function drawBarChart(container, data, color, year) {
     .style('font-size', '12px')
     .style('fill', '#444')
     .text('Avg Precipitation (mm/day)');
+
 }
 
 // render on page start
